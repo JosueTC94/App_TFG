@@ -11,9 +11,14 @@ const Medida = estructura.Medida;
 
 const controlWaspmote = require(path.join(__dirname,'config','waspmoteControl.js'));
 
+
+//passport-local
+
+//sessions
+
 app.get('/', function (req, res, next) {
     console.log('Hello World! Waspmote with MAC:'+req.query.MAC);
-    res.render('index');
+    // res.render('index');
 });
 
 app.get('/insertar_medida',function(req,res)
@@ -27,7 +32,8 @@ app.get('/insertar_medida',function(req,res)
       console.error(err);
       //Comunicar al administrador del sistema.
     }
-
+    console.log("Registrando medida para Waspmote:"+id);
+    
     let med = new Medida({
       Temperatura: req.query.Temperatura,
       Humedad: req.query.Humedad,
