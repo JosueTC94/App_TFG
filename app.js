@@ -23,26 +23,26 @@ passport.use(new LocalStrategy(
     console.log("Identificando usuario:");
     console.log("User->"+username);
     console.log("Password->"+password);
-
-    controlUsuario.verifyUser(username, password, (err, user) =>
-    {
-        if(err)
-        {
-          console.log("error");
-          return cb(null,false);
-        }
-
-        if(user)
-        {
-          console.log("Usuario logueado:"+JSON.stringify(user));
-          return cb(null, user);
-        }
-        else
-        {
-          console.log("Usuario no verificado");
-          return cb(null,null);
-        }
-    });
+    //
+    // controlUsuario.verifyUser(username, password, (err, user) =>
+    // {
+    //     if(err)
+    //     {
+    //       console.log("error");
+    //       return cb(null,false);
+    //     }
+    //
+    //     if(user)
+    //     {
+    //       console.log("Usuario logueado:"+JSON.stringify(user));
+    //       return cb(null, user);
+    //     }
+    //     else
+    //     {
+    //       console.log("Usuario no verificado");
+    //       return cb(null,null);
+    //     }
+    // });
   }
 ));
 
