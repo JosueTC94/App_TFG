@@ -9,13 +9,13 @@ var expressLayouts = require('express-ejs-layouts');
 
 var LocalStrategy = require('passport-local').Strategy;
 
-var estructura = require(path.join(__dirname,'models','bd.js'));
-const Waspmote = estructura.Waspmote;
-const Medida = estructura.Medida;
-const Usuario = estructura.Usuario;
-
-const controlWaspmote = require(path.join(__dirname,'config','waspmoteControl.js'));
-const controlUsuario = require(path.join(__dirname,'config','usuarioControl.js'));
+// var estructura = require(path.join(__dirname,'models','bd.js'));
+// const Waspmote = estructura.Waspmote;
+// const Medida = estructura.Medida;
+// const Usuario = estructura.Usuario;
+//
+// const controlWaspmote = require(path.join(__dirname,'config','waspmoteControl.js'));
+// const controlUsuario = require(path.join(__dirname,'config','usuarioControl.js'));
 
 //passport-local
 passport.use(new LocalStrategy(
