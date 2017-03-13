@@ -75,7 +75,7 @@ app.use(passport.session());
 
 app.get('/', function (req, res, next) {
     console.log('Hello World!');
-   res.render('index');
+   res.render('index', {response_login: null,  response_registro: null});
 });
 
 app.get('/login',
@@ -95,25 +95,59 @@ app.get('/login',
   }
 );
 
+app.post('/registro', function(req,res)
+{
+  console.log("/registro");
+  controlUsuario.registrarse(
+  {
+    Nombre: req.body.nombreRegistro,
+    Apellidos: req.body.apellidosRegistro,
+    Usuario: req.body.usernameRegistro,
+    Password: req.body.passwordRegistro
+  }, (err, response)=>
+  {
+    if(err)
+      throw err;
+
+    res.render('index', {response_login: null,  response_registro: response});
+  });
+});
+
 app.get('/administracion',function(req,res)
 {
   console.log("Administración");
 
-  Waspmote.find({},(err,datos)=>
+  // Waspmote.find({},(err,datos)=>
+  // {
+  //     if(err)
+  //       throw err;
+  //
+  //     console.log("Waspmotes del sistema:"+JSON.stringify(datos));
+  //     // console.log("Template:"+-underscore.template(waspmotesTemplate,{waspmotes: datos}));
+  //
+  // });
+  var dataWaspmotes;
+  var dataUsers;
+  controlWaspmote.getData((err,datos)=>
   {
+    if(err)
+      throw err;
+    dataWaspmotes = datos;
+    controlUsuario.getData((err,datos)=>
+    {
       if(err)
         throw err;
+      dataUsers = datos;
+      res.render("administracion.ejs", { admin: req.user, waspmotes: dataWaspmotes, usuarios: dataUsers});
+    });
 
-      console.log("Waspmotes del sistema:"+JSON.stringify(datos));
-      // console.log("Template:"+-underscore.template(waspmotesTemplate,{waspmotes: datos}));
-
-      res.render("administracion.ejs", { user: req.user, waspmotes: datos});
   });
 });
 
 app.get('/geo_waspmotes', function(req,res)
 {
-  controlWaspmote.geolocalizacion((err,datos)=>
+  console.log("Server geo_waspmotes:");
+  controlWaspmote.getData((err,datos)=>
   {
     if(err)
       throw err;
@@ -133,7 +167,20 @@ app.get('/borrar/:id',function(req,res)
         if(err)
           throw err;
   });
+  res.redirect('/administracion');
+});
 
+app.get('/borrarUser/:id',function(req,res)
+{
+  console.log("Borrando User con id:"+req.params.id);
+  controlUsuario.eliminar(req.params.id, (err, res)=>
+  {
+        console.log("Err:"+err);
+        console.log("Datos:"+res);
+
+        if(err)
+          throw err;
+  });
   res.redirect('/administracion');
 });
 
@@ -222,6 +269,37 @@ app.get('/insertar_medida',function(req,res)
 app.get('/error', (req,res)=>
 {
     res.render('error');
+});
+
+app.get('/actualizar_waspmote', (req,res)=>
+{
+  console.log("Server actualizar_waspmote");
+  console.log("Datos recibidos:"+JSON.stringify(req.query.data));
+  controlWaspmote.actualizar(req.query.data, (response)=>
+  {
+    res.send(response);
+  });
+
+});
+
+app.get('/logout',function(req,res){
+  req.logout();
+  req.session.destroy();
+  res.redirect('/');
+});
+
+app.get('/registro', function(req,res)
+{
+    let usu = new Usuario({
+      Usuario: req.query.Usuario,
+      Password: req.query.Password
+    });
+    usu.save((err)=>
+    {
+      if(err)
+        throw err;
+      console.log(`Creado ${usu}`);
+    });
 });
 
 app.listen(8080, function () {

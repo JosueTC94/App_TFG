@@ -39,4 +39,55 @@ var verifyUser = ((username, password, cb) =>
   });
 });
 
+var getData = ((cb)=>
+{
+    Usuario.find({},(err,datos)=>
+    {
+      if(err)
+        return cb(err,null);
+      return cb(null,datos);
+    });
+});
+
+var registrarse = ((datos,cb)=>
+{
+    console.log("User controler registrarse:"+JSON.stringify(datos));
+    let usuario = new Usuario(
+    {
+      Nombre: datos.Nombre,
+      Apellidos: datos.Apellidos,
+      Usuario: datos.Usuario,
+      Password: datos.Password,
+      Admin: false,
+      Creado: Date.now()
+    });
+
+    console.log("ea");
+
+    usuario.save((err)=>
+    {
+      if(err)
+      {
+        console.log("Errorrr:"+err);
+        return cb(err, "Usuario no creado");
+      }
+
+      console.log("Usuario creado con éxito");
+      return cb(null, "Usuario creado con éxito");
+    });
+});
+
+var eliminar = ((id, cb)=>
+{
+  Usuario.remove({_id: id}, (err,datos)=>
+  {
+    console.log("ERR:"+err);
+    console.log("Datos:"+datos);
+    return cb(err,datos);
+  });
+});
+
 exports.verifyUser = verifyUser;
+exports.getData = getData;
+exports.registrarse = registrarse;
+exports.eliminar = eliminar;

@@ -48,7 +48,7 @@ var insertar = ((datos,cb)=>
     Longitud: datos.waspmote_longitud,
     LevelBattery: datos.waspmote_bateria,
     Estado: datos.waspmote_estado,
-    FechaAlta: new Date('07.03.2017'),
+    FechaAlta: Date.now(),
     Comentarios: datos.waspmote_comentarios,
     MAC: datos.waspmote_mac
   });
@@ -63,8 +63,9 @@ var insertar = ((datos,cb)=>
   });
 });
 
-var geolocalizacion = ((cb)=>
+var getData = ((cb)=>
 {
+  console.log("Function geolocalizacion");
   Waspmote.find({}, (err,datos)=>
   {
       if(err)
@@ -77,7 +78,31 @@ var geolocalizacion = ((cb)=>
   });
 });
 
+var actualizar = ((data,cb)=>
+{
+  Waspmote.findOne({_id: data.id},(err,doc)=>
+  {
+    if(err)
+      throw err;
+
+    console.log("Documento:"+JSON.stringify(doc));
+    console.log("yeah:"+JSON.stringify(data));
+    try {
+      doc.FechaAlta = new Date(data.fecha);
+      doc.Estado = data.estado;
+      doc.Comentarios = data.comentarios;
+      doc.save();
+      return cb("Actualización realizada con éxito");
+    } catch (e) {
+      console.log("eaeaea");
+      return cb("Error:"+e);
+    }
+  });
+});
+
+
 exports.siregistrada = siregistrada;
 exports.eliminar = eliminar;
 exports.insertar = insertar;
-exports.geolocalizacion = geolocalizacion;
+exports.getData = getData;
+exports.actualizar = actualizar;

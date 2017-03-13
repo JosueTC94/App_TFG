@@ -1,59 +1,85 @@
-<script type="text/javascript" src="js/geoWaspmote.js"></script>
+<!-- <script type="text/javascript" src="js/geoWaspmote.js"></script> -->
 <script type="text/javascript">
-"use stric";
+"use strict";
 
 $(document).ready(()=>
 {
 
   initMap();
 
-  // $("#cargar").click(()=>
-  // {
-  //   $.ajax({
-  //       url: '/geo_waspmotes',
-  //       data: {},
-  //       type: 'GET',
-  //       jsonpCallback: 'callback', // this is not relevant to the POST anymore
-  //       success: function (data) {
-  //
-  //         var datos = data.waspmotes;
-  //
-  //         for(var i=0;i<datos.length;i++)
-  //         {
-  //           var myLatlng = new google.maps.LatLng(datos[i].Latitud,datos[i].Longitud);
-  //           var mapOptions = {
-  //             zoom: 4,
-  //             center: myLatlng
-  //           }
-  //           var marker = new google.maps.Marker({
-  //               position: myLatlng,
-  //               title:"Hello World!"
-  //           });
-  //           // To add the marker to the map, call setMap();
-  //           marker.setMap(map);
-  //         }
-  //
-  //       },
-  //       error: function (xhr, status, error) {
-  //             throw err;
-  //       },
-  //   });
-  // });
-  $("th > a").click(function()
+  $("th > button,.btn-default").click(function(event)
   {
-    console.log("eaaaa");
+    event.preventDefault();
     console.log("Id: "+this.id);
 
     $("#actualizar_waspmote").show();
+    $("#form_actualizar_waspmote").submit((event)=>
+    {
+        event.preventDefault();
+        var datos = new Object({
+          id: this.id,
+          fecha: $('input:text[name=actualizar_fecha]').val(),
+          estado: $('input[name=optradio]:checked').val(),
+          comentarios: $('textarea[name=actualizar_comentarios]').val()
+        });
+        console.log("Datos cogidos del form:"+JSON.stringify(datos));
+        $.get('/actualizar_waspmote',{data: datos},(confirmacion)=>
+        {
+            $("#response_actualizacion").html('<p>'+confirmacion+'</p>');
+            document.location.href = "/administracion";
+            // location.reload();
+        });
+    });
   });
 });
 
+
+
 </script>
 
-<% if(user){ %>
-  <div class="panel panel-default">
+<% if(admin){ %>
+  <nav class="navbar navbar-default navbar-fixed-top navbar-inverse bg-inverse">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/administracion">Administración</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#controlWaspmotes">Control Waspmote<span class="sr-only">(current)</span></a></li>
+            <li><a href="#logsWaspmotes">Logs</a></li>
+            <li><a href="#usuariosOrganizacion">Usuarios</a></li>
+            <li><a href="#geoWaspmotes">Geolocalización</a></li>
+            <li><a href="#registerWaspmotes">Nueva Waspmote</a></li>
+          </ul>
+          <form class="navbar-form navbar-left">
+            <div class="form-group">
+              <input type="text" class="form-control" placeholder="Search">
+            </div>
+            <button type="submit" class="btn btn-default">Submit</button>
+          </form>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Perfil<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="/logout">Logout</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+  </nav>
+  <div id="controlWaspmotes" class="panel panel-default">
     <!-- Default panel contents -->
-    <div class="panel-heading">Control Waspmotes</div>
+    <div class="panel-heading"><b>Control Waspmotes</b></div>
     <div class="panel-body">
       <p>Panel de administración de los dispositivos disponibles</p>
     </div>
@@ -67,7 +93,7 @@ $(document).ready(()=>
           <th>Bateria</th>
           <th>Latitud</th>
           <th>Longitud</th>
-          <th>Fecha Alta</th>
+          <th>Fecha de Alta</th>
           <th>Comentarios</th>
         </tr>
       </thead>
@@ -86,7 +112,7 @@ $(document).ready(()=>
               <th><%= waspmotes[i].Longitud %></th>
               <th><%= waspmotes[i].FechaAlta %></th>
               <th><%= waspmotes[i].Comentarios %></th>
-              <th><a href="#" id="<%= waspmotes[i]._id %>" class="btn btn-default">Cambiar</a></th>
+              <th><button type="submit" id="<%= waspmotes[i]._id %>" class="btn btn-default">Cambiar</button></th>
               <th><a href="/borrar/<%= waspmotes[i]._id %>" class="btn btn-danger">Eliminar</a></th>
             <tr>
             <% }; %>
@@ -98,110 +124,204 @@ $(document).ready(()=>
 
   </div>
 
-
-
-  <div style="margin-top:100px;" class="panel panel-default">
+  <div id="actualizar_waspmote" style="display:none;margin-top:100px;" class="panel panel-default">
     <!-- Default panel contents -->
-    <div class="panel-heading">Logs</div>
+    <div class="panel-heading"><b>Actualizar Waspmote</b></div>
+    <div class="panel-body">
+      <!--Formulario para introducir Waspmotes -->
+      <form id="form_actualizar_waspmote" style="margin-top:30px;" class="form-horizontal" role="form">
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label for="actualizar_fecha" class="col-lg-2 control-label">Fecha de Alta</label>
+            <div class="col-lg-9">
+              <div class='input-group date'>
+                <input type="text" class="form-control" name="actualizar_fecha" id="actualizar_fecha"
+                       placeholder="Ej: 03.07.2017">
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="actualizar_estado" class="col-lg-2 control-label">Estado del dispositivo</label>
+            <div class="col-lg-10">
+              <div class="col-lg-5">
+                <div class="radio">
+                  <label><input type="radio" name="optradio" value="true">Activo</label>
+                </div>
+              </div>
+              <div class="col-lg-5">
+                <div class="radio">
+                  <label><input type="radio" name="optradio" value="false">No activo</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="form-group">
+           <!-- <label for="comment"></label> -->
+           <textarea class="form-control" rows="7" name="actualizar_comentarios" id="actualizar_comentarios" placeholder="Comentarios" ></textarea>
+          </div>
+        </div>
+
+        <div class="col-lg-12">
+          <div class="col-lg-6">
+            <div id="response_actualizacion" style="text-align: center"></div>
+          </div>
+          <div class="col-lg-6">
+            <button type="submit" class="btn btn-success pull-right">Actualizar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="logsWaspmotes" style="margin-top:100px;" class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><b>Logs</b></div>
     <div class="panel-body">
       <p>Actualizaciones, errores y mensajes</p>
     </div>
   </div>
 
-  <div style="margin-top:100px;" class="panel panel-default">
+  <div id="usuariosOrganizacion" style="margin-top:100px;" class="panel panel-default">
     <!-- Default panel contents -->
-    <div class="panel-heading">Geolocalización de las Waspmotes</div>
+    <div class="panel-heading"><b>Usuarios</b></div>
     <div class="panel-body">
-      <a href="/geo_waspmotes" class="btn btn-default pull-right">Cargar</a>
+      <p>Usuarios de la plataforma</p>
+    </div>
+    <% if(usuarios){ %>
+      <!-- Table -->
+      <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Apellidos</th>
+          <th>Usuario</th>
+          <th>Password</th>
+          <th>Admin</th>
+          <th>Creado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(var i=0;i<usuarios.length;i++){ %>
+            <tr>
+              <th><%= usuarios[i].Nombre %></th>
+              <th><%= usuarios[i].Apellidos %></th>
+              <th><%= usuarios[i].Usuario %></th>
+              <th><%= usuarios[i].Password %></th>
+              <th><%= usuarios[i].Admin %></th>
+              <th><%= usuarios[i].Creado %></th>
+              <% if(usuarios[i].Admin == true){ %>
+                <th><a href="#" class="btn btn-default">Cambiar</a></th>
+              <% }else{%>
+                <th><a href="/borrarUser/<%= usuarios[i]._id %>" class="btn btn-danger">Eliminar</a></th>
+              <% } %>
+            <tr>
+            <% }; %>
+      </tbody>
+    </table>
+  <% }else{ %>
+    No hay usuarios registrados en la plataforma
+  <% } %>
+  </div>
+
+  <div id="geoWaspmotes" style="margin-top:100px;" class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><b>Geolocalización de las Waspmotes</b></div>
+    <div class="panel-body">
       <div id="map"></div>
     </div>
   </div>
 
-  <div style="margin-top:100px;" class="panel panel-default">
+  <div id="registerWaspmotes" style="margin-top:100px;" class="panel panel-default">
     <!-- Default panel contents -->
-    <div class="panel-heading">Registro</div>
+    <div class="panel-heading"><b>Registro</b></div>
     <div class="panel-body">
       <p>Insertando nuevo dispositivo en la base de datos</p>
-
     <!--Formulario para introducir Waspmotes -->
-    <form action="/insertar_waspmote" method="POST" style="margin-top:30px;" class="form-horizontal" role="form">
-      <div class="col-lg-6">
-        <div class="form-group">
-          <label for="waspmote_mac" class="col-lg-2 control-label">MAC</label>
-          <div class="col-lg-10">
-            <input type="text" class="form-control" name="waspmote_mac" id="waspmote_mac"
-                   placeholder=" ">
+      <form action="/insertar_waspmote" method="POST" style="margin-top:30px;" class="form-horizontal" role="form">
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label for="waspmote_mac" class="col-lg-2 control-label">MAC</label>
+            <div class="col-lg-10">
+              <input type="text" class="form-control" name="waspmote_mac" id="waspmote_mac"
+                     placeholder=" ">
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="waspmote_latitud" class="col-lg-2 control-label">Latitud</label>
-          <div class="col-lg-10">
-            <input type="text" class="form-control" name="waspmote_latitud" id="waspmote_latitud"
-                   placeholder=" ">
+          <div class="form-group">
+            <label for="waspmote_latitud" class="col-lg-2 control-label">Latitud</label>
+            <div class="col-lg-10">
+              <input type="text" class="form-control" name="waspmote_latitud" id="waspmote_latitud"
+                     placeholder=" ">
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="waspmote_longitud" class="col-lg-2 control-label">Longitud</label>
-          <div class="col-lg-10">
-            <input type="text" class="form-control" name="waspmote_longitud" id="waspmote_longitud"
-                   placeholder=" ">
+          <div class="form-group">
+            <label for="waspmote_longitud" class="col-lg-2 control-label">Longitud</label>
+            <div class="col-lg-10">
+              <input type="text" class="form-control" name="waspmote_longitud" id="waspmote_longitud"
+                     placeholder=" ">
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="waspmote_bateria" class="col-lg-2 control-label">Bateria</label>
-          <div class="col-lg-10">
-            <input type="text" class="form-control" name="waspmote_bateria" id="waspmote_bateria"
-                   placeholder=" ">
+          <div class="form-group">
+            <label for="waspmote_bateria" class="col-lg-2 control-label">Bateria</label>
+            <div class="col-lg-10">
+              <input type="text" class="form-control" name="waspmote_bateria" id="waspmote_bateria"
+                     placeholder=" ">
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="waspmote_estado" class="col-lg-2 control-label">Estado del dispositivo</label>
-          <div class="col-lg-10">
-            <div class="col-lg-5">
-              <div class="radio">
-                <label><input type="radio" name="optradio" value="true">Activo</label>
+          <div class="form-group">
+            <label for="waspmote_estado" class="col-lg-2 control-label">Estado del dispositivo</label>
+            <div class="col-lg-10">
+              <div class="col-lg-5">
+                <div class="radio">
+                  <label><input type="radio" name="optradio" value="true">Activo</label>
+                </div>
+              </div>
+              <div class="col-lg-5">
+                <div class="radio">
+                  <label><input type="radio" name="optradio" value="false">No activo</label>
+                </div>
               </div>
             </div>
-            <div class="col-lg-5">
-              <div class="radio">
-                <label><input type="radio" name="optradio" value="false">No activo</label>
+          </div>
+
+        </div>
+        <div class="col-lg-6">
+          <div class="form-group">
+           <!-- <label for="comment"></label> -->
+           <textarea class="form-control" rows="7" name="waspmote_comentarios" id="waspmote_comentarios" placeholder="Comentarios" ></textarea>
+          </div>
+          <!-- <div class="form-group">
+            <label for="waspmote_fecha" class="col-lg-2 control-label">Fecha</label>
+            <div class="col-lg-10">
+              <div class='input-group date'>
+                <input type="text" class="form-control" name="waspmote_fecha" id="waspmote_fecha"
+                       placeholder="Ej: 03.07.2017">
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
 
-      </div>
-      <div class="col-lg-6">
-        <div class="form-group">
-         <!-- <label for="comment"></label> -->
-         <textarea class="form-control" rows="7" name="waspmote_comentarios" id="waspmote_comentarios" placeholder="Comentarios" ></textarea>
-        </div>
-        <div class="form-group">
-          <label for="waspmote_fecha" class="col-lg-2 control-label">Fecha</label>
-          <div class="col-lg-10">
-            <div class='input-group date'>
-              <input type="text" class="form-control" name="waspmote_fecha" id="waspmote_fecha"
-                     placeholder="Ej: 03.07.2017">
-              <span class="input-group-addon">
-                  <span class="glyphicon glyphicon-calendar"></span>
-              </span>
+        <div class="col-lg-12">
+          <div class="form-group">
+            <div class="col-lg-offset-2 col-lg-10">
+              <button type="submit" class="btn btn-primary pull-right">Insertar</a>
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="col-lg-12">
-        <div class="form-group">
-          <div class="col-lg-offset-2 col-lg-10">
-            <button type="submit" class="btn btn-primary pull-right">Insertar</a>
-          </div>
-        </div>
-      </div>
     </form>
   </div>
 </div>
+<% }else{ %>
+<a href="/logout" class="btn btn-primary">Logout</a>
 <% } %>

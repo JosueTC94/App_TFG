@@ -1,21 +1,55 @@
 <div class="container">
-  <form action="/login" method="GET">
-    <div class="row">
-        <div class="col-md-offset-5 col-md-3">
-            <div class="form-login">
-            <h4>Welcome back.</h4>
-            <input type="text" id="username" name="username" class="form-control input-sm chat-input" placeholder="username" />
-            </br>
-            <input type="text" id="password" name="password" class="form-control input-sm chat-input" placeholder="password" />
-            </br>
-            <div class="wrapper">
-            <!-- <span class="group-btn">
-                <a href="/login" class="btn btn-primary btn-md">login <i class="fa fa-sign-in"></i></a>
-            </span> -->
-            <button type="submit" class="btn btn-primary">Login</button>
-            </div>
+  <div class="col-lg-12">
+    <div class="col-lg-6">
+      <form action="/login" method="GET">
+        <div class="row">
+            <div class="col-md-offset-1">
+                <div class="form-login">
+                <h4>Inicio de Sesión</h4>
+                <input type="text" id="username" name="username" class="form-control input-sm chat-input" placeholder="username" />
+                </br>
+                <input type="password" id="password" name="password" class="form-control input-sm chat-input" placeholder="password" />
+                </br>
+                <div class="wrapper">
+                <!-- <span class="group-btn">
+                    <a href="/login" class="btn btn-primary btn-md">login <i class="fa fa-sign-in"></i></a>
+                </span> -->
+                <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+                </div>
             </div>
         </div>
+      </form>
+      <%= response_login %>
     </div>
-  </form>
+    <div class="col-lg-6">
+      <form action="/registro" method="POST">
+        <div class="row">
+            <div class="col-md-offset-1">
+                <div class="form-login">
+                <h4>Registro</h4>
+                <input type="text" id="usernameRegistro" name="usernameRegistro" class="form-control input-sm chat-input" placeholder="Username" />
+                </br>
+                <input type="password" id="passwordRegistro" name="passwordRegistro" class="form-control input-sm chat-input" placeholder="Password" />
+                </br>
+                <input type="text" id="nombreRegistro" name="nombreRegistro" class="form-control input-sm chat-input" placeholder="Nombre" />
+                </br>
+                <input type="text" id="apellidosRegistro" name="apellidosRegistro" class="form-control input-sm chat-input" placeholder="Apellidos" />
+                </br>
+                <div class="col-lg-12">
+                  <div class="col-lg-7">
+                    <p class="pull-left"><%= response_registro %></p>
+                  </div>
+                  <div class="col-lg-5">
+                    <div class="wrapper">
+                      <button type="submit" class="btn btn-primary pull-right">Registro</button>
+                    </div>
+                  </div>
+                </div>
+                </div>
+            </div>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

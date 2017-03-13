@@ -22,6 +22,18 @@ const UsuarioSchema = new Schema({
     Creado: Date
 }, {collection: "usuarios"});
 
+// UsuarioSchema.pre('save',(next) => {
+//     console.log("preeee");
+//     var user = this;
+//
+//     var hash = bcrypt.hashSync(user.Password);
+//     console.log("hash:"+hash);
+//     user.Password = hash;
+//
+//     console.log("User new:"+JSON.stringify(user));
+//     return next();
+// });
+
 // UsuarioSchema.methods.verifyUser = ((username, password, cb) =>
 // {
 //   console.log("Accedi");
@@ -82,7 +94,7 @@ Usuario.remove({}, (err)=>
       Creado: Date.now()
     });
 
-    admin.save((err) =>
+    admin.save((err) =>    // admin.save((err) =>
     {
       if(err)
         throw err;
@@ -97,8 +109,8 @@ Waspmote.remove({}, (err)=>
   {
     let wasp1 = new Waspmote(
     {
-        Latitud: -17.345788,
-        Longitud: -20.463736,
+        Latitud: -25.363,
+        Longitud: 131.044,
         LevelBattery: 58,
         Estado: true,
         FechaAlta: new Date('07.03.2017'),
