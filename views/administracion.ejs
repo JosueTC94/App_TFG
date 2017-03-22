@@ -7,10 +7,56 @@ $(document).ready(()=>
 
   initMap();
 
-  $("th > button,.btn-default").click(function(event)
+  $("th > button[name='mediciones']").click(function(event)
   {
     event.preventDefault();
-    console.log("Id: "+this.id);
+    console.log("Viendo medidas:"+this.id);
+    $("#medidas_waspmote").show();
+    $.get('/get_mediciones', {id:this.id}, (data)=>
+    {
+      console.log("Datos:"+JSON.stringify(data));
+      data = data.medidas;
+      $("#response_geo_mediciones").html('<p>Se han registrado '+data.length+' mediciones');
+
+      if(data != null)
+      {
+          var info = `
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Temperatura</th>
+                    <th>Humedad</th>
+                    <th>Presion</th>
+                    <th>ContaminantesAire</th>
+                    <th>COLevel</th>
+                    <th>CO2Level</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+              `;
+          for(var i=0;i<data.length;i++)
+          {
+            info += `<tr>
+                      <th>${data[i].Temperatura}</th>
+                      <th>${data[i].Humedad}</th>
+                      <th>${data[i].Presion}</th>
+                      <th>${data[i].ContaminantesAire}</th>
+                      <th>${data[i].COLevel}</th>
+                      <th>${data[i].CO2Level}</th>
+                      <th>${data[i].Fecha}</th>
+                    </tr>`;
+          }
+          info += `</tbody></table>`;
+          $("#content_mediciones").html(info);
+        }
+    });
+  });
+  
+  $("th > button[name='cambiar']").click(function(event)
+  {
+    event.preventDefault();
+    console.log("EAAAAAAAAAAAAAAAA Id: "+this.id);
 
     $("#actualizar_waspmote").show();
     $("#form_actualizar_waspmote").submit((event)=>
@@ -112,7 +158,8 @@ $(document).ready(()=>
               <th><%= waspmotes[i].Longitud %></th>
               <th><%= waspmotes[i].FechaAlta %></th>
               <th><%= waspmotes[i].Comentarios %></th>
-              <th><button type="submit" id="<%= waspmotes[i]._id %>" class="btn btn-default">Cambiar</button></th>
+              <th><button type="submit" id="<%= waspmotes[i]._id %>" class="btn btn-success" name="mediciones">Mediciones</button></th>
+              <th><button type="submit" id="<%= waspmotes[i]._id %>" class="btn btn-default" name="cambiar">Cambiar</button></th>
               <th><a href="/borrar/<%= waspmotes[i]._id %>" class="btn btn-danger">Eliminar</a></th>
             <tr>
             <% }; %>
@@ -124,6 +171,14 @@ $(document).ready(()=>
 
   </div>
 
+  <div id="medidas_waspmote" style='display:none;margin-top:100px;' class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><b>Medidas capturadas</b></div>
+    <div class="panel-body">
+      <div id="response_geo_mediciones"></div>
+      <div id="content_mediciones" style="overflow:scroll;height:300px;"></div>
+    </div>
+  </div>
   <div id="actualizar_waspmote" style="display:none;margin-top:100px;" class="panel panel-default">
     <!-- Default panel contents -->
     <div class="panel-heading"><b>Actualizar Waspmote</b></div>
@@ -131,18 +186,18 @@ $(document).ready(()=>
       <!--Formulario para introducir Waspmotes -->
       <form id="form_actualizar_waspmote" style="margin-top:30px;" class="form-horizontal" role="form">
         <div class="col-lg-6">
-          <div class="form-group">
-            <label for="actualizar_fecha" class="col-lg-2 control-label">Fecha de Alta</label>
-            <div class="col-lg-9">
-              <div class='input-group date'>
-                <input type="text" class="form-control" name="actualizar_fecha" id="actualizar_fecha"
-                       placeholder="Ej: 03.07.2017">
-                <span class="input-group-addon">
-                    <span class="glyphicon glyphicon-calendar"></span>
-                </span>
-              </div>
-            </div>
-          </div>
+          <!--<div class="form-group">-->
+          <!--  <label for="actualizar_fecha" class="col-lg-2 control-label">Fecha de Alta</label>-->
+          <!--  <div class="col-lg-9">-->
+          <!--    <div class='input-group date'>-->
+          <!--      <input type="text" class="form-control" name="actualizar_fecha" id="actualizar_fecha"-->
+          <!--             placeholder="Ej: 03.07.2017">-->
+          <!--      <span class="input-group-addon">-->
+          <!--          <span class="glyphicon glyphicon-calendar"></span>-->
+          <!--      </span>-->
+          <!--    </div>-->
+          <!--  </div>-->
+          <!--</div>-->
           <div class="form-group">
             <label for="actualizar_estado" class="col-lg-2 control-label">Estado del dispositivo</label>
             <div class="col-lg-10">
@@ -214,9 +269,7 @@ $(document).ready(()=>
               <th><%= usuarios[i].Password %></th>
               <th><%= usuarios[i].Admin %></th>
               <th><%= usuarios[i].Creado %></th>
-              <% if(usuarios[i].Admin == true){ %>
-                <th><a href="#" class="btn btn-default">Cambiar</a></th>
-              <% }else{%>
+              <% if(usuarios[i].Admin != true){ %>
                 <th><a href="/borrarUser/<%= usuarios[i]._id %>" class="btn btn-danger">Eliminar</a></th>
               <% } %>
             <tr>
@@ -232,6 +285,7 @@ $(document).ready(()=>
     <!-- Default panel contents -->
     <div class="panel-heading"><b>Geolocalización de las Waspmotes</b></div>
     <div class="panel-body">
+      <div id="response_geoWaspmotes"></div>
       <div id="map"></div>
     </div>
   </div>
@@ -248,7 +302,7 @@ $(document).ready(()=>
             <label for="waspmote_mac" class="col-lg-2 control-label">MAC</label>
             <div class="col-lg-10">
               <input type="text" class="form-control" name="waspmote_mac" id="waspmote_mac"
-                     placeholder=" ">
+                     placeholder=" " required="required" pattern="([A-Za-z]|[0-9])+">
             </div>
           </div>
 
@@ -256,7 +310,7 @@ $(document).ready(()=>
             <label for="waspmote_latitud" class="col-lg-2 control-label">Latitud</label>
             <div class="col-lg-10">
               <input type="text" class="form-control" name="waspmote_latitud" id="waspmote_latitud"
-                     placeholder=" ">
+                     placeholder=" " pattern="^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}">
             </div>
           </div>
 
@@ -264,7 +318,7 @@ $(document).ready(()=>
             <label for="waspmote_longitud" class="col-lg-2 control-label">Longitud</label>
             <div class="col-lg-10">
               <input type="text" class="form-control" name="waspmote_longitud" id="waspmote_longitud"
-                     placeholder=" ">
+                     placeholder=" " pattern="^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}">
             </div>
           </div>
 
@@ -272,7 +326,7 @@ $(document).ready(()=>
             <label for="waspmote_bateria" class="col-lg-2 control-label">Bateria</label>
             <div class="col-lg-10">
               <input type="text" class="form-control" name="waspmote_bateria" id="waspmote_bateria"
-                     placeholder=" ">
+                     placeholder=" " pattern="^0*(?:[1-9][0-9]?|100)">
             </div>
           </div>
 
@@ -281,7 +335,7 @@ $(document).ready(()=>
             <div class="col-lg-10">
               <div class="col-lg-5">
                 <div class="radio">
-                  <label><input type="radio" name="optradio" value="true">Activo</label>
+                  <label><input type="radio" name="optradio" value="true" checked>Activo</label>
                 </div>
               </div>
               <div class="col-lg-5">
@@ -315,7 +369,8 @@ $(document).ready(()=>
         <div class="col-lg-12">
           <div class="form-group">
             <div class="col-lg-offset-2 col-lg-10">
-              <button type="submit" class="btn btn-primary pull-right">Insertar</a>
+              <span id="response_insertar_waspmote"></span>
+              <button type="submit" id="form_insertar_waspmote" class="btn btn-primary pull-right">Insertar</a>
             </div>
           </div>
         </div>

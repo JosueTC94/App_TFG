@@ -1,0 +1,2 @@
+- Es posible que la función sprintf nos esté dando un problema a la hora de mandar los datos como consecuencia
+del número de caracteres de la cadena.

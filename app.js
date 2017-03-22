@@ -3,16 +3,15 @@
 var express = require('express');
 var app = express();
 var path = require('path');
-var basePath = process.cwd();
+// var basePath = process.cwd();
 var passport = require('passport');
 var expressLayouts = require('express-ejs-layouts');
-var underscore = require('underscore');
 var LocalStrategy = require('passport-local').Strategy;
 
 var estructura = require(path.join(__dirname,'models','bd.js'));
-const Waspmote = estructura.Waspmote;
-const Medida = estructura.Medida;
-const Usuario = estructura.Usuario;
+// const Waspmote = estructura.Waspmote;
+// const Medida = estructura.Medida;
+// const Usuario = estructura.Usuario;
 
 const controlWaspmote = require(path.join(__dirname,'config','waspmoteControl.js'));
 const controlUsuario = require(path.join(__dirname,'config','usuarioControl.js'));
@@ -116,16 +115,8 @@ app.post('/registro', function(req,res)
 app.get('/administracion',function(req,res)
 {
   console.log("Administración");
+//Promesas
 
-  // Waspmote.find({},(err,datos)=>
-  // {
-  //     if(err)
-  //       throw err;
-  //
-  //     console.log("Waspmotes del sistema:"+JSON.stringify(datos));
-  //     // console.log("Template:"+-underscore.template(waspmotesTemplate,{waspmotes: datos}));
-  //
-  // });
   var dataWaspmotes;
   var dataUsers;
   controlWaspmote.getData((err,datos)=>
@@ -141,6 +132,21 @@ app.get('/administracion',function(req,res)
       res.render("administracion.ejs", { admin: req.user, waspmotes: dataWaspmotes, usuarios: dataUsers});
     });
 
+  });
+});
+
+app.get('/get_mediciones', function(req,res)
+{
+  console.log("Server: /geo_mediciones");
+  controlWaspmote.getMedidas(req.query.id,(err,data)=>
+  {
+    if(err)
+      throw err;
+    if(data!=null)
+    {
+      console.log("Server data:"+JSON.stringify(data));
+      res.send({medidas:data});
+    }
   });
 });
 
@@ -217,53 +223,31 @@ app.get('/insertar_medida',function(req,res)
 {
   //Verificar waspmote
 // http://localhost:3000/insertar_medida?Temperatura=21&Humedad=1&Presion=2&ContaminantesAire=3&COLevel=4&CO2Level=5
+
   console.log("Insertando medida...");
-  controlWaspmote.siregistrada(req.query.MAC, (err,id)=>
+  
+  var url = require('url');
+  var url_parts = url.parse(req.url, true);
+  var query = url_parts.query;
+
+  console.log("url:"+req.url);
+  console.log("query:"+JSON.stringify(query));
+  
+  controlWaspmote.insertarMedida(query, (err,nuevaMedida)=>
   {
     if(err)
     {
-      console.error(err);
-      res.redirect('/');
+      console.error("Medida no guardada correctamente. Error:"+err);
+      return res.status(500).send(err);
     }
-      //Comunicar al administrador del sistema.
-    console.log("Registrando medida para Waspmote:"+id);
-
-    if(id != null)
+      
+    if(nuevaMedida != null)
     {
-      let med = new Medida({
-        Temperatura: req.query.Temperatura,
-        Humedad: req.query.Humedad,
-        Presion: req.query.Presion,
-        ContaminantesAire: req.query.ContaminantesAire,
-        COLevel: req.query.COLevel,
-        CO2Level: req.query.CO2Level,
-        _creator: id
-      });
-      med.save((err)=>
-      {
-        if(err) console.error("Error:"+err);
-        console.log(`Guardada ${med}`);
-      }).then(()=>
-      {
-        Medida
-          .findOne({Temperatura: req.query.Temperatura,
-          Humedad: req.query.Humedad,
-          Presion: req.query.Presion,
-          ContaminantesAire: req.query.ContaminantesAire,
-          COLevel: req.query.COLevel,
-          CO2Level: req.query.CO2Level,
-          Fecha: req.query.Fecha
-          })
-          .populate('_creator')
-          .exec((err,medida)=>
-          {
-            if(err) return console.log(err);
-          }).then(()=>{
-              res.redirect('/');
-          });
-      });
+      console.log("Medida guardada correctamente:"+JSON.stringify(nuevaMedida));
+      res.status(200).send("Medida guardada correctamente...");
     }
-    });
+      
+  });
 });
 
 app.get('/error', (req,res)=>
@@ -286,20 +270,6 @@ app.get('/logout',function(req,res){
   req.logout();
   req.session.destroy();
   res.redirect('/');
-});
-
-app.get('/registro', function(req,res)
-{
-    let usu = new Usuario({
-      Usuario: req.query.Usuario,
-      Password: req.query.Password
-    });
-    usu.save((err)=>
-    {
-      if(err)
-        throw err;
-      console.log(`Creado ${usu}`);
-    });
 });
 
 app.listen(8080, function () {

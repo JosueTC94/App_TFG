@@ -111,7 +111,7 @@ Waspmote.remove({}, (err)=>
     {
         Latitud: -25.363,
         Longitud: 131.044,
-        LevelBattery: 58,
+        LevelBattery: 1,
         Estado: true,
         FechaAlta: new Date('07.03.2017'),
         Comentarios: "El dispositivo se encuentra en un ambiente muy activo y tormentoso",
@@ -135,6 +135,7 @@ Waspmote.remove({}, (err)=>
           ContaminantesAire: 33333333,
           COLevel: 4444444,
           CO2Level:55555555,
+          Fecha: Date.now(),
           _creator: wasp1._id
       });
 
@@ -145,7 +146,7 @@ Waspmote.remove({}, (err)=>
       }).then(()=>
       {
           Medida
-            .findOexports.Usuario = UsuarioSchemane({
+            .findOne({
               Temperatura: 22,
               Humedad: 1111111,
               Presion: 2222222,
